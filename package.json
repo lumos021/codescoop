@@ -1,0 +1,75 @@
+{
+  "name": "codescoop",
+  "version": "1.0.0",
+  "description": "Extract HTML component dependencies for AI-powered React/Next.js conversion",
+  "main": "src/index.js",
+  "bin": {
+    "codescoop": "./bin/codescoop.js"
+  },
+  "scripts": {
+    "start": "node bin/codescoop.js"
+  },
+  "keywords": [
+    "html",
+    "css",
+    "javascript",
+    "react",
+    "nextjs",
+    "conversion",
+    "migration",
+    "jquery",
+    "wordpress",
+    "magento",
+    "component",
+    "extractor",
+    "analyzer",
+    "cli",
+    "llm",
+    "ai",
+    "gpt",
+    "claude",
+    "chatgpt",
+    "openai",
+    "anthropic",
+    "debugging",
+    "scss",
+    "dependencies",
+    "php",
+    "blade",
+    "twig"
+  ],
+  "author": "",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/codescoop.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yourusername/codescoop/issues"
+  },
+  "homepage": "https://github.com/yourusername/codescoop#readme",
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "files": [
+    "bin/",
+    "src/",
+    "README.md",
+    "LICENSE"
+  ],
+  "dependencies": {
+    "acorn": "^8.11.3",
+    "acorn-loose": "^8.4.0",
+    "acorn-walk": "^8.3.2",
+    "chalk": "^4.1.2",
+    "cheerio": "^1.0.0-rc.12",
+    "commander": "^12.0.0",
+    "glob": "^10.3.10",
+    "inquirer": "^8.2.6",
+    "js-beautify": "^1.14.11",
+    "postcss": "^8.4.35",
+    "postcss-scss": "^4.0.9",
+    "sass": "^1.71.1",
+    "specificity": "^1.0.0"
+  }
+}

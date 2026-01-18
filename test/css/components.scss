@@ -1,0 +1,65 @@
+// SCSS Components
+
+$primary-color: #6c63ff;
+$secondary-color: #16213e;
+$text-color: #fff;
+$spacing-md: 1rem;
+
+// Dropdown Component Styles
+.dropdown-menu {
+    background: $secondary-color;
+    border: 1px solid rgba($primary-color, 0.3);
+
+    .dropdown-list {
+        padding: $spacing-md;
+    }
+
+    .dropdown-item {
+        color: $text-color;
+        padding: $spacing-md / 2;
+
+        &:hover {
+            background: rgba($primary-color, 0.2);
+        }
+
+        &.active {
+            color: $primary-color;
+        }
+    }
+}
+
+// Product Card Component
+.product-card {
+    background: $secondary-color;
+    border-radius: 16px;
+
+    .product-title {
+        color: $text-color;
+        font-weight: 600;
+    }
+
+    .product-price {
+        color: $primary-color;
+    }
+
+    &:hover {
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+    }
+}
+
+// Animation keyframes
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.dropdown-menu.open {
+    animation: fadeIn 0.3s ease forwards;
+}
