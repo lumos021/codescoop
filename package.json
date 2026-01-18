@@ -1,6 +1,6 @@
 {
   "name": "codescoop",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Extract HTML component dependencies for AI-powered React/Next.js conversion",
   "main": "src/index.js",
   "bin": {
@@ -38,16 +38,16 @@
     "blade",
     "twig"
   ],
-  "author": "",
+  "author": "Lumos021",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/yourusername/codescoop.git"
+    "url": "https://github.com/lumos021/codescoop.git"
   },
   "bugs": {
-    "url": "https://github.com/yourusername/codescoop/issues"
+    "url": "https://github.com/lumos021/codescoop/issues"
   },
-  "homepage": "https://github.com/yourusername/codescoop#readme",
+  "homepage": "https://github.com/lumos021/codescoop#readme",
   "engines": {
     "node": ">=16.0.0"
   },

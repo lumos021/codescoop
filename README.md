@@ -233,12 +233,12 @@ Frontend analysis is hard. Here is how CodeScoop solves the common "black holes"
 ## Contributing
 
 Found a bug? Want a feature? PRs welcome!
-
-```bash
-git clone https://github.com/yourusername/codescoop.git
-cd codescoop && npm install
-node bin/codescoop.js test/sample.html -s ".navbar"
-```
+ 
+ ```bash
+ git clone https://github.com/lumos021/codescoop.git
+ cd codescoop && npm install
+ node bin/codescoop.js test/sample.html -s ".navbar"
+ ```
 
 ---
 
