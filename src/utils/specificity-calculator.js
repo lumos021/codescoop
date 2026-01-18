@@ -17,6 +17,27 @@ function calculateSpecificity(selector) {
         return [0, 0, 0, 0];
     }
 
+    // Special case: :where() always has 0,0,0 specificity per W3C spec
+    // Check if selector contains :where() but NOT inside :is() or other pseudo-classes
+    if (selector.includes(':where(')) {
+        // If the selector is ONLY :where(...) content, return 0,0,0
+        // Example: :where(.menu, .nav) -> 0,0,0
+        // But :is(.menu):where(.active) -> calculate :is() part only
+
+        // Simple heuristic: if selector starts with :where(, it's purely :where()
+        if (selector.trim().startsWith(':where(')) {
+            return [0, 0, 0, 0];
+        }
+
+        // More complex: has both :is() and :where()
+        // For now, strip :where() parts and calculate the rest
+        const withoutWhere = selector.replace(/:where\([^)]+\)/g, '');
+        if (withoutWhere.trim().length === 0) {
+            return [0, 0, 0, 0];
+        }
+        selector = withoutWhere;
+    }
+
     try {
         const result = calculate(selector);
         if (result) {

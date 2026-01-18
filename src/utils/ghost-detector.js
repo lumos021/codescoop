@@ -112,8 +112,22 @@ function detectGhostClasses(targetInfo, cssResults = [], cssLibraryResults = [],
         /^animate__/, /^aos-/, /^fade/, /^slide/, /^zoom/,
 
         // Utility libraries
-        /^u-/, /^util-/, /^helper-/
+        /^u-/, /^util-/, /^helper-/,
+
+        // CSS Modules (build-time hash patterns)
+        // Examples: Button_primary_a8f3d, styles_header_x9k2l, MyComponent__button__2x3d
+        /^[A-Z][a-zA-Z0-9]*_[a-zA-Z0-9]+_[a-z0-9]{4,}$/,  // CamelCase_name_hash
+        /_[a-z0-9]{5,}$/,  // Any class ending with _hash (5+ chars)
+        /^[a-z]+__[a-z]+__[a-z0-9]{4,}$/,  // BEM-like with hash: component__element__hash
+
+        // CSS-in-JS (Styled Components, Emotion)
+        // Examples: sc-bdVaJa, css-1x2y3z, emotion-0
+        /^sc-[a-zA-Z0-9]{5,}$/,  // Styled Components: sc-xxxxx
+        /^css-[a-z0-9]{5,}$/,     // Generic CSS-in-JS: css-xxxxx
+        /^emotion-\d+$/,          // Emotion: emotion-0, emotion-1
+        /^jss\d+$/                // JSS: jss0, jss1
     ];
+
 
     // Find ghost classes (in HTML but not in any CSS)
     const ghostClasses = classes.filter(cls => {

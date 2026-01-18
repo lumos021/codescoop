@@ -182,7 +182,37 @@ async function runAnalysis(options) {
     const variableData = await extractVariablesFromMatches(allCSSMatches, allCSSFiles, projectDir);
     log(`Found ${variableData.usedVariables.length} variables used`);
 
-    // Step 11: Generate markdown output
+    // Step 11: Extract and check assets
+    log('\nExtracting assets...');
+    const { extractCSSAssets } = require('./parsers/css-analyzer');
+    const { checkAssetAvailability } = require('./utils/asset-checker');
+
+    // Get HTML assets (already extracted in targetInfo)
+    const htmlAssets = targetInfo.assets || { images: [], videos: [], audio: [], icons: [], canvas: [], svgs: [] };
+
+    // Extract CSS assets
+    const cssAssets = extractCSSAssets(cssResults);
+
+    // Combine all assets
+    const allAssets = [
+        ...htmlAssets.images.map(a => ({ ...a, source: 'html' })),
+        ...htmlAssets.videos.map(a => ({ ...a, source: 'html' })),
+        ...htmlAssets.audio.map(a => ({ ...a, source: 'html' })),
+        ...htmlAssets.icons.map(a => ({ ...a, source: 'html' })),
+        ...cssAssets.map(a => ({ ...a, source: 'css' }))
+    ];
+
+    // Check asset availability
+    const assetStatus = await checkAssetAvailability(
+        allAssets,
+        projectDir || process.cwd(),
+        htmlPath,
+        { checkRemote: false } // Can be controlled by CLI flag later
+    );
+
+    log(`Assets: ${assetStatus.total} total, ${assetStatus.available} available, ${assetStatus.missing} missing`);
+
+    // Step 12: Generate markdown output
     log('\nGenerating markdown report...');
     const analysis = {
         targetInfo,
@@ -197,6 +227,8 @@ async function runAnalysis(options) {
         inlineScripts,
         missingImports,
         variableData,
+        htmlAssets,
+        assetStatus,
         generatedAt: new Date().toISOString(),
         // Output options
         outputOptions: {

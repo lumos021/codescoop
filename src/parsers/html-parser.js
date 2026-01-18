@@ -160,6 +160,9 @@ function extractTargetElement($, htmlContent, options) {
     // Generate a summary description
     const summary = generateSummary(tagName, classes, ids);
 
+    // Extract assets from target element
+    const assets = extractAssets(targetElement, $);
+
     return {
         html: targetHtml,
         classes,
@@ -172,7 +175,8 @@ function extractTargetElement($, htmlContent, options) {
         summary,
         selector: selector || `lines ${lineRange}`,
         matchCount,
-        warning
+        warning,
+        assets
     };
 }
 
@@ -448,8 +452,175 @@ function getHTMLStructure($) {
     return structure;
 }
 
+/**
+ * Extract all assets (images, videos, audio, icons, canvas, SVG) from target element
+ * @param {CheerioElement} element - Target element
+ * @param {CheerioAPI} $ - Cheerio instance
+ * @returns {Object} Assets grouped by type
+ */
+function extractAssets(element, $) {
+    const assets = {
+        images: [],
+        videos: [],
+        audio: [],
+        icons: [],
+        canvas: [],
+        svgs: []
+    };
+
+    // Extract IMG tags
+    element.find('img').each((_, el) => {
+        const $el = $(el);
+        const src = $el.attr('src');
+        const srcset = $el.attr('srcset');
+        const alt = $el.attr('alt') || '';
+
+        if (src) {
+            assets.images.push({
+                src,
+                type: 'img',
+                alt,
+                srcset: srcset || null
+            });
+        }
+
+        // Parse srcset for additional images
+        if (srcset) {
+            const srcsetUrls = srcset.split(',').map(s => s.trim().split(' ')[0]);
+            srcsetUrls.forEach(url => {
+                if (url && url !== src) {
+                    assets.images.push({
+                        src: url,
+                        type: 'img-srcset',
+                        alt
+                    });
+                }
+            });
+        }
+    });
+
+    // Extract PICTURE sources
+    element.find('picture source').each((_, el) => {
+        const $el = $(el);
+        const srcset = $el.attr('srcset');
+        if (srcset) {
+            const srcsetUrls = srcset.split(',').map(s => s.trim().split(' ')[0]);
+            srcsetUrls.forEach(url => {
+                assets.images.push({
+                    src: url,
+                    type: 'picture-source'
+                });
+            });
+        }
+    });
+
+    // Extract VIDEO tags
+    element.find('video').each((_, el) => {
+        const $el = $(el);
+        const src = $el.attr('src');
+        const poster = $el.attr('poster');
+
+        if (src) {
+            assets.videos.push({
+                src,
+                type: 'video',
+                poster
+            });
+        }
+
+        if (poster) {
+            assets.images.push({
+                src: poster,
+                type: 'video-poster'
+            });
+        }
+
+        // Extract source tags inside video
+        $el.find('source').each((_, source) => {
+            const sourceSrc = $(source).attr('src');
+            if (sourceSrc) {
+                assets.videos.push({
+                    src: sourceSrc,
+                    type: 'video-source'
+                });
+            }
+        });
+    });
+
+    // Extract AUDIO tags
+    element.find('audio').each((_, el) => {
+        const $el = $(el);
+        const src = $el.attr('src');
+
+        if (src) {
+            assets.audio.push({
+                src,
+                type: 'audio'
+            });
+        }
+
+        // Extract source tags inside audio
+        $el.find('source').each((_, source) => {
+            const sourceSrc = $(source).attr('src');
+            if (sourceSrc) {
+                assets.audio.push({
+                    src: sourceSrc,
+                    type: 'audio-source'
+                });
+            }
+        });
+    });
+
+    // Extract LINK icons (favicon, apple-touch-icon, etc.)
+    element.find('link[rel*="icon"]').each((_, el) => {
+        const $el = $(el);
+        const href = $el.attr('href');
+        const rel = $el.attr('rel');
+
+        if (href) {
+            assets.icons.push({
+                src: href,
+                type: 'icon',
+                rel
+            });
+        }
+    });
+
+    // Extract CANVAS elements (for WebGL detection)
+    element.find('canvas').each((_, el) => {
+        const $el = $(el);
+        const id = $el.attr('id');
+        const width = $el.attr('width');
+        const height = $el.attr('height');
+
+        assets.canvas.push({
+            id: id || 'unnamed',
+            width: width || 'auto',
+            height: height || 'auto',
+            type: 'canvas'
+        });
+    });
+
+    // Extract inline SVG elements (count only, not full content)
+    element.find('svg').each((_, el) => {
+        const $el = $(el);
+        const id = $el.attr('id');
+        const viewBox = $el.attr('viewBox');
+
+        assets.svgs.push({
+            id: id || 'unnamed',
+            viewBox: viewBox || null,
+            type: 'inline-svg',
+            inline: true
+        });
+    });
+
+    return assets;
+}
+
 module.exports = {
     parseHTML,
     extractTargetElement,
-    getHTMLStructure
+    getHTMLStructure,
+    extractAssets
 };

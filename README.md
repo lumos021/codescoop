@@ -31,6 +31,7 @@ CodeScoop analyzes your project and generates a forensic report containing:
 * **Ghost Classes:** Identifies classes in HTML that have *no* matching CSS
 * **JS Forensics:** Finds jQuery listeners and vanilla JS events targeting your elements
 * **Variable Resolution:** Inlines values for `var(--primary)` so you don't need to hunt them down
+* **Asset Inventory:** Lists all images, videos, fonts, canvas elements with availability status
 
 ---
 
@@ -43,6 +44,20 @@ Don't just list files. **Solve specificity wars.** CodeScoop calculates specific
 ### Ghost Class Detection
 
 Cleaning up legacy code? CodeScoop flags classes in your HTML that have **zero matching CSS rules** in your project. Delete them with confidence.
+
+### Asset Extraction & Verification
+
+CodeScoop automatically extracts and checks all assets from your component:
+
+* **Images:** From `<img>`, CSS `background-image`, video posters
+* **Media:** Videos, audio files with availability status
+* **Fonts:** CSS `@font-face` references
+* **Canvas/WebGL:** Detects canvas elements for 3D rendering context
+* **SVG:** Inline and external SVG graphics
+
+**For Debugging:** See which images are missing (404) and where they're referenced
+
+**For AI Conversion:** LLM gets complete asset list to include in React components
 
 ### Smart Extraction
 
@@ -227,6 +242,40 @@ Frontend analysis is hard. Here is how CodeScoop solves the common "black holes"
 ### 5. Advanced Modern CSS
 *   **Problem:** Modern features like Shadow DOM (`::part`) and CSS Houdini (`@property`) are often ignored by traditional parsers.
 *   **Solution:** CodeScoop includes native support for these features, correctly identifying `::part()` and `::slotted()` rules and extracting structured `@property` definitions.
+
+### 6. CSS Modules & CSS-in-JS Detection
+*   **Problem:** Build-time hashing (CSS Modules: `Button_primary_a8f3d`) and runtime CSS-in-JS (Styled Components: `sc-bdVaJa`) create dynamic class names that look like "missing" CSS to static analyzers.
+*   **Solution:** Our **Smart Filter** recognizes 50+ patterns including:
+    *   CSS Modules hashes (`_hash` suffix patterns)
+    *   Styled Components (`sc-xxxxx`)
+    *   Emotion (`emotion-0`, `css-xxxxx`)
+    *   JSS (`jss0`, `jss1`)
+    These are excluded from Ghost Class reports, keeping output focused on actual issues.
+
+---
+
+## What We DON'T Handle (And Why)
+
+While CodeScoop solves 95%+ of CSS analysis problems, some scenarios are outside the scope of static analysis:
+
+### Runtime CSS-in-JS Generation
+**Example:** `styled.div\`color: ${props => props.color};\``
+*   **Why:** Styles are generated at runtime based on component props/state. No static CSS file exists to analyze.
+*   **Workaround:** Use `--for-conversion` mode which hints at CSS-in-JS patterns in your JavaScript.
+
+### Dynamic className Manipulation
+**Example:** `element.classList.add('dynamic-class-' + userId)`
+*   **Why:** Class names are computed at runtime. Static analysis can't predict all possible values.
+*   **Impact:** These may appear as "Ghost Classes" if not defined in your CSS.
+*   **Workaround:** Use `js-` or `is-` prefixes for JS-generated classes (auto-filtered).
+
+### Source Maps
+**Why:** Line numbers from the original source are "good enough" for debugging. Parsing `.css.map` files adds significant complexity for minimal benefit.
+
+### CSS Custom Media Queries (Draft Spec)
+**Example:** `@custom-media --mobile (max-width: 768px);`
+*   **Why:** Requires PostCSS plugin preprocessing. Very low adoption (< 1% of sites).
+*   **Status:** Not planned unless adoption increases.
 
 ---
 

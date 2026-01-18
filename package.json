@@ -1,6 +1,6 @@
 {
   "name": "codescoop",
-  "version": "1.0.1",
+  "version": "1.0.3",
   "description": "Extract HTML component dependencies for AI-powered React/Next.js conversion",
   "main": "src/index.js",
   "bin": {

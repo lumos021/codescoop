@@ -480,9 +480,63 @@ function getCacheStats() {
     };
 }
 
+/**
+ * Extract assets from CSS (background images, fonts, etc.)
+ * @param {Array} cssResults - Array of CSS analysis results
+ * @returns {Array} Array of asset objects
+ */
+function extractCSSAssets(cssResults) {
+    const assets = [];
+    const urlRegex = /url\(['"]?([^'"()]+)['"]?\)/g;
+
+    for (const result of cssResults) {
+        const allRules = [
+            ...(result.matches || []),
+            ...(result.shadowDOMRules || [])
+        ];
+
+        for (const match of allRules) {
+            const content = match.content || '';
+
+            // Extract all url() references
+            let urlMatch;
+            while ((urlMatch = urlRegex.exec(content)) !== null) {
+                const url = urlMatch[1].trim();
+
+                // Determine asset type based on context
+                let assetType = 'css-unknown';
+
+                if (content.includes('background')) {
+                    assetType = 'css-background';
+                } else if (content.includes('list-style')) {
+                    assetType = 'css-list-style';
+                } else if (content.includes('content:')) {
+                    assetType = 'css-content';
+                } else if (content.includes('cursor:')) {
+                    assetType = 'css-cursor';
+                } else if (content.includes('@font-face')) {
+                    assetType = 'css-font';
+                } else if (content.includes('mask') || content.includes('clip-path')) {
+                    assetType = 'css-mask';
+                }
+
+                assets.push({
+                    src: url,
+                    type: assetType,
+                    location: `${path.basename(result.filePath)}:${match.startLine}`,
+                    selector: match.selector
+                });
+            }
+        }
+    }
+
+    return assets;
+}
+
 module.exports = {
     analyzeCSS,
     formatCSS,
     clearCache,
-    getCacheStats
+    getCacheStats,
+    extractCSSAssets
 };

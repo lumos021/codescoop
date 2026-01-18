@@ -1,0 +1,20 @@
+﻿============================================================
+CodeScoop Black Holes - Code Inspection
+============================================================
+Γ£ô BH1: Nested SCSS Resolution
+Γ£ô BH2: Minified CSS Detection
+Γ£ô BH3: Specificity Calculator
+Γ£ô BH4: Utility Class Filtering
+Γ£ô BH5: Library Detection
+Γ£ô BH6: CSS Variable Extraction
+Γ£ô BH7: :is/:where/:not/:has Support
+Γ£ô BH8: @layer/@container/@supports
+Γ£ô BH9: Missing Import Detection
+Γ£ô BH10: @keyframes Linking
+Γ£ô BH11: Attribute Selector Matching
+Γ£ô BH12: Shadow DOM (::part/::slotted)
+Γ£ô BH13: CSS Houdini (@property)
+Γ£ô BH14: Parse Caching
+============================================================
+Result: 14/14 features verified in code
+============================================================

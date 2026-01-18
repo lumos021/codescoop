@@ -27,6 +27,8 @@ function generateMarkdown(analysis) {
         inlineScripts,
         missingImports,
         variableData = {},
+        htmlAssets = {},
+        assetStatus = {},
         generatedAt,
         outputOptions = {}
     } = analysis;
@@ -115,6 +117,12 @@ function generateMarkdown(analysis) {
     const houdiniSection = generateHoudiniSection(cssResults, projectDir);
     if (houdiniSection) {
         sections.push(houdiniSection);
+    }
+
+    // Assets & Resources
+    const assetsSection = generateAssetsSection(htmlAssets, assetStatus);
+    if (assetsSection) {
+        sections.push(assetsSection);
     }
 
     // CSS Dependencies (custom code only)
@@ -554,9 +562,129 @@ function updateSummaryForAdvancedFeatures(cssResults) {
     return summaryAddition;
 }
 
+/**
+ * Generate Assets & Resources section
+ */
+function generateAssetsSection(htmlAssets, assetStatus) {
+    const { details = [] } = assetStatus;
+
+    if (details.length === 0) {
+        return null; // No assets to report
+    }
+
+    let content = `## Assets & Resources\n\n`;
+
+    // Summary
+    content += `> **Total:** ${assetStatus.total} | `;
+    content += `**Available:** ${assetStatus.available} | `;
+    content += `**Missing:** ${assetStatus.missing} | `;
+    content += `**External:** ${assetStatus.external} | `;
+    content += `**Embedded:** ${assetStatus.embedded}\n\n`;
+
+    // Group by category
+    const images = details.filter(a => a.type.includes('img') || a.type.includes('background') || a.type.includes('poster'));
+    const videos = details.filter(a => a.type.includes('video') && !a.type.includes('poster'));
+    const audio = details.filter(a => a.type.includes('audio'));
+    const fonts = details.filter(a => a.type.includes('font'));
+    const icons = details.filter(a => a.type === 'icon');
+    const canvas = htmlAssets.canvas || [];
+    const svgs = htmlAssets.svgs || [];
+
+    // Images
+    if (images.length > 0) {
+        content += `### Images (${images.length})\n\n`;
+        content += `| Path | Type | Status | Size | Location |\n`;
+        content += `|------|------|--------|------|----------|\n`;
+
+        images.forEach(img => {
+            const status = img.status === 'OK' ? 'OK' :
+                img.status === 'EMBEDDED' ? 'Embedded' :
+                    img.status === 'EXTERNAL' ? 'External' :
+                        '**NOT FOUND**';
+            const size = img.sizeFormatted || '-';
+            const location = img.location || 'HTML';
+            content += `| \`${img.src}\` | ${img.type} | ${status} | ${size} | ${location} |\n`;
+        });
+        content += `\n`;
+    }
+
+    // Videos
+    if (videos.length > 0) {
+        content += `### Videos (${videos.length})\n\n`;
+        videos.forEach(vid => {
+            const status = vid.status === 'OK' ? 'OK' : vid.status === 'EXTERNAL' ? 'External' : '**NOT FOUND**';
+            content += `- \`${vid.src}\` - ${status}`;
+            if (vid.sizeFormatted) content += ` (${vid.sizeFormatted})`;
+            content += `\n`;
+        });
+        content += `\n`;
+    }
+
+    // Audio
+    if (audio.length > 0) {
+        content += `### Audio (${audio.length})\n\n`;
+        audio.forEach(aud => {
+            const status = aud.status === 'OK' ? 'OK' : aud.status === 'EXTERNAL' ? 'External' : '**NOT FOUND**';
+            content += `- \`${aud.src}\` - ${status}\n`;
+        });
+        content += `\n`;
+    }
+
+    // Fonts
+    if (fonts.length > 0) {
+        content += `### Fonts (${fonts.length})\n\n`;
+        fonts.forEach(font => {
+            const status = font.status === 'OK' ? 'OK' : font.status === 'EXTERNAL' ? 'External' : '**NOT FOUND**';
+            content += `- \`${font.src}\` - ${status}`;
+            if (font.sizeFormatted) content += ` (${font.sizeFormatted})`;
+            content += `\n`;
+        });
+        content += `\n`;
+    }
+
+    // Icons
+    if (icons.length > 0) {
+        content += `### Icons (${icons.length})\n\n`;
+        icons.forEach(icon => {
+            content += `- \`${icon.src}\` (${icon.rel || 'icon'})\n`;
+        });
+        content += `\n`;
+    }
+
+    // Canvas (for WebGL/3D context)
+    if (canvas.length > 0) {
+        content += `### Canvas Elements (${canvas.length})\n\n`;
+        content += `> **Note:** Canvas elements may be used for WebGL/3D rendering. LLM can infer library (Three.js, Babylon.js) from associated JavaScript.\n\n`;
+        canvas.forEach(c => {
+            content += `- ID: \`${c.id}\` | Size: ${c.width} x ${c.height}\n`;
+        });
+        content += `\n`;
+    }
+
+    // SVG
+    if (svgs.length > 0) {
+        content += `### Inline SVG (${svgs.length})\n\n`;
+        content += `> Inline SVG graphics detected. Full SVG code is included in the HTML section.\n\n`;
+        svgs.forEach(s => {
+            content += `- ID: \`${s.id}\``;
+            if (s.viewBox) content += ` | ViewBox: ${s.viewBox}`;
+            content += `\n`;
+        });
+        content += `\n`;
+    }
+
+    // Missing assets warning
+    if (assetStatus.missing > 0) {
+        content += `> **Warning:** ${assetStatus.missing} asset(s) are missing. These may cause broken images or functionality.\n\n`;
+    }
+
+    return content;
+}
+
 module.exports = {
     generateMarkdown,
     generateShadowDOMSection,
     generateHoudiniSection,
-    updateSummaryForAdvancedFeatures
+    updateSummaryForAdvancedFeatures,
+    generateAssetsSection
 };

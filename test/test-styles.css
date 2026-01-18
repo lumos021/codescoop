@@ -1,0 +1,8 @@
+.hero {
+    background-image: url('images/hero-bg.jpg');
+    padding: 2rem;
+}
+
+.hero h1 {
+    color: #333;
+}
